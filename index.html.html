@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practical Quizzes on Data Structures & Algorithms</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f1a;--surface:#111827;--surface2:#1a2235;--border:#1e2d45;--border2:#2a3f60;
+  --accent:#3b82f6;--accent2:#60a5fa;--green:#10b981;--green2:#34d399;
+  --red:#ef4444;--amber:#f59e0b;--amber2:#fbbf24;--purple:#8b5cf6;--purple2:#a78bfa;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);padding:3rem 2rem 2.5rem;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(59,130,246,.13),transparent)}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:999px;padding:6px 16px;font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.1rem}
+.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,#fff 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.4rem}
+.hero-by{font-size:.9rem;font-weight:600;color:var(--purple2);letter-spacing:.04em;margin-bottom:.6rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:480px;margin:0 auto 1.8rem}
+.hero-stats{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-n{font-size:1.8rem;font-weight:700;color:var(--accent2)}
+.stat-l{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+
+/* ── NAV ── */
+.nav-wrap{position:sticky;top:0;z-index:100;background:rgba(11,15,26,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav-tabs{display:flex;max-width:900px;margin:0 auto;overflow-x:auto}
+.tab-btn{flex:1;min-width:150px;padding:.85rem 1rem;font-family:var(--sans);font-size:.82rem;font-weight:600;color:var(--text3);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;white-space:nowrap;text-align:center}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.tab-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);font-size:.7rem;margin-right:6px;transition:all .2s}
+.tab-btn.active .tab-num{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── PANELS ── */
+.quiz-panel{display:none;max-width:860px;margin:0 auto;padding:2rem 1.5rem 5rem}
+.quiz-panel.active{display:block}
+
+/* ── QUIZ HEADER ── */
+.qhdr{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.8rem;margin-bottom:2rem;display:flex;align-items:center;gap:1.4rem;position:relative;overflow:hidden}
+.qhdr::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+.q1 .qhdr::before{background:linear-gradient(90deg,var(--accent),var(--purple))}
+.q2 .qhdr::before{background:linear-gradient(90deg,var(--amber),var(--red))}
+.q3 .qhdr::before{background:linear-gradient(90deg,var(--green),var(--accent))}
+.qhdr-icon{width:50px;height:50px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.q1 .qhdr-icon{background:rgba(59,130,246,.15)}
+.q2 .qhdr-icon{background:rgba(245,158,11,.15)}
+.q3 .qhdr-icon{background:rgba(16,185,129,.15)}
+.qhdr-info h2{font-size:1.15rem;font-weight:700;margin-bottom:.3rem}
+.qhdr-meta{display:flex;gap:.55rem;flex-wrap:wrap}
+.meta-pill{font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2)}
+
+/* ── QUESTION CARD ── */
+.qcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:1.4rem;overflow:hidden}
+.qcard-head{padding:1.3rem 1.5rem}
+.q-num{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.5rem}
+.q-text{font-size:.97rem;color:var(--text);line-height:1.75}
+.q-text code{font-family:var(--mono);font-size:.84rem;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:1px 6px;color:var(--accent2)}
+.q-text strong{color:#fff;font-weight:700}
+
+/* code snippet inside question */
+.q-snippet{margin-top:.9rem;background:#0d1117;border:1px solid var(--border2);border-radius:10px;padding:.9rem 1.1rem;font-family:var(--mono);font-size:.79rem;line-height:1.9;overflow-x:auto;color:#6272a4}
+
+/* ── SHOW ANSWER BTN ── */
+.ans-toggle-wrap{padding:.8rem 1.5rem;border-top:1px solid var(--border)}
+.btn-show-ans{width:100%;padding:.65rem;border-radius:9px;font-family:var(--sans);font-size:.85rem;font-weight:600;cursor:pointer;border:1px dashed var(--border2);background:transparent;color:var(--text3);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-show-ans:hover{border-color:var(--purple2);color:var(--purple2);background:rgba(139,92,246,.06)}
+.btn-show-ans.revealed{border-color:var(--purple);color:var(--purple2);background:rgba(139,92,246,.08)}
+.btn-show-ans .arrow{transition:transform .25s}
+.btn-show-ans.revealed .arrow{transform:rotate(180deg)}
+
+/* ── ANSWER PANEL ── */
+.answer-panel{display:none;border-top:1px solid var(--border)}
+.answer-panel.open{display:block}
+.ans-hdr{padding:.55rem 1.2rem;background:rgba(139,92,246,.1);font-size:.69rem;font-weight:700;color:var(--purple2);text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;gap:5px}
+.ans-body{padding:1rem 1.3rem;font-family:var(--mono);font-size:.79rem;color:#f8f8f2;line-height:1.85;white-space:pre-wrap;overflow-x:auto;background:#0d1117}
+
+/* ── MARK ENTRY ── */
+.mark-section{padding:1rem 1.5rem 1.2rem;border-top:1px solid var(--border);background:var(--surface2);display:none}
+.mark-section.open{display:block}
+.mark-label{font-size:.75rem;font-weight:600;color:var(--text2);margin-bottom:.6rem;display:flex;align-items:center;gap:6px}
+.mark-label::before{content:'✎';color:var(--amber2)}
+.mark-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.mark-input{width:80px;padding:.45rem .7rem;border-radius:8px;background:#0d1117;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:1rem;font-weight:700;outline:none;text-align:center;transition:border-color .2s}
+.mark-input:focus{border-color:var(--accent)}
+.mark-max{font-size:.82rem;color:var(--text3);font-family:var(--mono)}
+.btn-apply{padding:.45rem 1.1rem;border-radius:8px;font-family:var(--sans);font-size:.8rem;font-weight:700;cursor:pointer;border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.12);color:var(--accent2);transition:all .15s}
+.btn-apply:hover{background:rgba(59,130,246,.22)}
+.mark-badge{display:none;padding:.35rem .9rem;border-radius:999px;font-size:.78rem;font-weight:700;font-family:var(--mono)}
+.mark-badge.show{display:inline-flex;align-items:center;gap:5px}
+.mark-badge.excellent{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35);color:var(--green2)}
+.mark-badge.good{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:var(--accent2)}
+.mark-badge.redo{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.35);color:#fca5a5}
+
+/* ── TOTAL SCORE CARD ── */
+.total-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:1.8rem;margin-top:1.5rem;text-align:center;display:none}
+.total-card.show{display:block}
+.total-circle{width:90px;height:90px;border-radius:50%;margin:0 auto .9rem;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono)}
+.total-big{font-size:1.9rem;font-weight:700;line-height:1}
+.total-denom{font-size:.8rem;color:var(--text2)}
+.total-msg{font-size:1rem;font-weight:700;margin-bottom:.3rem}
+.total-sub{font-size:.84rem;color:var(--text2)}
+.g-perfect{background:radial-gradient(circle,rgba(16,185,129,.2),rgba(16,185,129,.04));border:2px solid rgba(16,185,129,.4)}
+.g-good{background:radial-gradient(circle,rgba(59,130,246,.2),rgba(59,130,246,.04));border:2px solid rgba(59,130,246,.4)}
+.g-ok{background:radial-gradient(circle,rgba(245,158,11,.2),rgba(245,158,11,.04));border:2px solid rgba(245,158,11,.4)}
+.g-redo{background:radial-gradient(circle,rgba(239,68,68,.2),rgba(239,68,68,.04));border:2px solid rgba(239,68,68,.4)}
+
+/* ── SUBMIT / RESET ── */
+.quiz-footer{margin-top:1.4rem;display:flex;flex-direction:column;align-items:center;gap:.7rem}
+.btn-quiz-submit{padding:.78rem 2.4rem;border-radius:10px;font-family:var(--sans);font-size:.93rem;font-weight:700;cursor:pointer;border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.14);color:var(--accent2);transition:all .2s}
+.btn-quiz-submit:hover:not(:disabled){background:rgba(59,130,246,.24);transform:translateY(-1px)}
+.btn-quiz-submit:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-reset{padding:.5rem 1.3rem;border-radius:8px;font-family:var(--sans);font-size:.82rem;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .15s}
+.btn-reset:hover{color:var(--text)}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-badge">Alexandria University · Data Structures Labs</div>
+  <h1>Practical Quizzes on Data Structures &amp; Algorithms</h1>
+  <div class="hero-by">by Eng. Hanin Hendawy</div>
+  <p>Read each question, show the answer to check yourself, then enter your mark.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-n">3</div><div class="stat-l">Quizzes</div></div>
+    <div class="stat"><div class="stat-n">6</div><div class="stat-l">Questions</div></div>
+    <div class="stat"><div class="stat-n">10</div><div class="stat-l">Marks Each</div></div>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<div class="nav-wrap">
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab(0)"><span class="tab-num">1</span>Searching &amp; Queue</button>
+    <button class="tab-btn"        onclick="switchTab(1)"><span class="tab-num">2</span>Sorting &amp; Stack</button>
+    <button class="tab-btn"        onclick="switchTab(2)"><span class="tab-num">3</span>Linked List &amp; Searching</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     QUIZ 1 — Searching & Queue
+══════════════════════════════════════════════ -->
+<div class="quiz-panel q1 active" id="panel0">
+  <div class="qhdr">
+    <div class="qhdr-icon">🔍</div>
+    <div class="qhdr-info">
+      <h2>Quiz 1 — Searching &amp; Queue</h2>
+      <div class="qhdr-meta">
+        <span class="meta-pill">Labs 3 &amp; 7/8</span>
+        <span class="meta-pill">2 Questions</span>
+        <span class="meta-pill">10 Marks Total</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="qcard">
+    <div class="qcard-head">
+      <div class="q-num">Question 1 &nbsp;·&nbsp; 5 marks</div>
+      <div class="q-text">
+        Implement <code>binarySearch</code> in Java. The method takes a <strong>sorted</strong> integer array and a key, and returns the index of the key — or <code>-1</code> if not found.<br><br>
+        Write the full method and test it with the array <code>{10, 25, 30, 45, 50}</code> searching for key <code>45</code>. Print the result.
+      </div>
+    </div>
+    <div class="ans-toggle-wrap">
+      <button class="btn-show-ans" onclick="toggleAnswer(this,'ap0_1','ms0_1')">
+        <span>👁 Show Answer</span><span class="arrow">▾</span>
+      </button>
+    </div>
+    <div class="answer-panel" id="ap0_1">
+      <div class="ans-hdr">✓ Model Answer</div>
+      <div class="ans-body">public static int binarySearch(int[] arr, int key) {
+    int left = 0;
+    int right = arr.length - 1;
+
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        if (arr[mid] == key)
+            return mid;
+        else if (arr[mid] < key)
+            left = mid + 1;
+        else
+            right = mid - 1;
+    }
+    return -1; // not found
+}
+
+public static void main(String[] args) {
+    int[] arr = {10, 25, 30, 45, 50}; // sorted
+    int key = 45;
+    int result = binarySearch(arr, key);
+    if (result != -1)
+        System.out.println("Element found at index: " + result);
+    else
+        System.out.println("Element not found");
+}
+
+// Output:  Element found at index: 3
+// Time Complexity:
+//   Best Case    → O(1)      (element at middle)
+//   Worst Case   → O(log n)  (element not found)
+//   Average Case → O(log n)</div>
+    </div>
+    <div class="mark-section" id="ms0_1">
+      <div class="mark-label">Enter your mark for this question</div>
+      <div class="mark-row">
+        <input class="mark-input" type="number" min="0" max="5" placeholder="0–5" id="mk0_1">
+        <span class="mark-max">/ 5</span>
+        <button class="btn-apply" onclick="applyMark('mk0_1',5,'bd0_1')">Apply</button>
+        <span class="mark-badge" id="bd0_1"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qcard">
+    <div class="qcard-head">
+      <div class="q-num">Question 2 &nbsp;·&nbsp; 5 marks</div>
+      <div class="q-text">
+        Implement a <strong>Queue using an Array</strong> in Java. Your <code>myQueue</code> class must support:<br>
+        <code>enqueue(x)</code> · <code>dequeue()</code> · <code>getFront()</code> · <code>getRear()</code> · <code>isEmpty()</code> · <code>isFull()</code><br><br>
+        In <code>main</code>, create a queue with capacity <strong>3</strong>, enqueue <code>10, 20, 30</code>, print the front — then dequeue once and print the new front and rear.
+        <div class="q-snippet">// Expected output:
+// Front: 10
+// Front: 20
+// Rear:  30</div>
+      </div>
+    </div>
+    <div class="ans-toggle-wrap">
+      <button class="btn-show-ans" onclick="toggleAnswer(this,'ap0_2','ms0_2')">
+        <span>👁 Show Answer</span><span class="arrow">▾</span>
+      </button>
+    </div>
+    <div class="answer-panel" id="ap0_2">
+      <div class="ans-hdr">✓ Model Answer</div>
+      <div class="ans-body">class myQueue {
+    int[] arr;
+    int capacity;
+    int size;
+
+    myQueue(int capacity) {
+        this.capacity = capacity;
+        arr = new int[capacity];
+        size = 0;
+    }
+
+    boolean isEmpty() { return size == 0; }
+    boolean isFull()  { return size == capacity; }
+
+    void enqueue(int x) {
+        if (isFull()) { System.out.println("Queue is full!"); return; }
+        arr[size] = x;
+        size++;
+    }
+
+    void dequeue() {
+        if (isEmpty()) { System.out.println("Queue is empty!"); return; }
+        for (int i = 1; i < size; i++)
+            arr[i - 1] = arr[i];
+        size--;
+    }
+
+    int getFront() { return isEmpty() ? -1 : arr[0]; }
+    int getRear()  { return isEmpty() ? -1 : arr[size - 1]; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        myQueue q = new myQueue(3);
+        q.enqueue(10);
+        q.enqueue(20);
+        q.enqueue(30);
+        System.out.println("Front: " + q.getFront()); // Front: 10
+        q.dequeue();
+        System.out.println("Front: " + q.getFront()); // Front: 20
+        System.out.println("Rear: "  + q.getRear());  // Rear:  30
+    }
+}
+// Queue is FIFO — First In, First Out.
+// dequeue() shifts all remaining elements one position left.</div>
+    </div>
+    <div class="mark-section" id="ms0_2">
+      <div class="mark-label">Enter your mark for this question</div>
+      <div class="mark-row">
+        <input class="mark-input" type="number" min="0" max="5" placeholder="0–5" id="mk0_2">
+        <span class="mark-max">/ 5</span>
+        <button class="btn-apply" onclick="applyMark('mk0_2',5,'bd0_2')">Apply</button>
+        <span class="mark-badge" id="bd0_2"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-footer">
+    <button class="btn-quiz-submit" id="sub0" onclick="calcTotal(0)">Calculate Total Grade</button>
+    <button class="btn-reset" onclick="resetQuiz(0)">↺ Reset Quiz</button>
+  </div>
+  <div class="total-card" id="grade0"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     QUIZ 2 — Sorting & Stack
+══════════════════════════════════════════════ -->
+<div class="quiz-panel q2" id="panel1">
+  <div class="qhdr">
+    <div class="qhdr-icon">⬆️</div>
+    <div class="qhdr-info">
+      <h2>Quiz 2 — Sorting &amp; Stack</h2>
+      <div class="qhdr-meta">
+        <span class="meta-pill">Labs 4 &amp; 6</span>
+        <span class="meta-pill">2 Questions</span>
+        <span class="meta-pill">10 Marks Total</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="qcard">
+    <div class="qcard-head">
+      <div class="q-num">Question 1 &nbsp;·&nbsp; 5 marks</div>
+      <div class="q-text">
+        Implement <strong>Bubble Sort</strong> in Java using the optimised version with a <code>swapped</code> boolean flag so it stops early when the array is already sorted.<br><br>
+        Test it on the array <code>{5, 1, 4, 2, 8}</code> and print the sorted result using <code>Arrays.toString(arr)</code>.
+        <div class="q-snippet">// Trace — Pass 0:
+// {5,1,4,2,8} → swap 5&amp;1 → {1,5,4,2,8}
+//             → swap 5&amp;4 → {1,4,5,2,8}
+//             → swap 5&amp;2 → {1,4,2,5,8}
+// Pass 1:     → swap 4&amp;2 → {1,2,4,5,8} ✓ done</div>
+      </div>
+    </div>
+    <div class="ans-toggle-wrap">
+      <button class="btn-show-ans" onclick="toggleAnswer(this,'ap1_1','ms1_1')">
+        <span>👁 Show Answer</span><span class="arrow">▾</span>
+      </button>
+    </div>
+    <div class="answer-panel" id="ap1_1">
+      <div class="ans-hdr">✓ Model Answer</div>
+      <div class="ans-body">import java.util.Arrays;
+
+public static void bubbleSort(int arr[]) {
+    int n = arr.length;
+    boolean swapped;
+
+    for (int i = 0; i < n - 1; i++) {
+        swapped = false;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp  = arr[j];
+                arr[j]    = arr[j + 1];
+                arr[j + 1] = temp;
+                swapped = true;
+            }
+        }
+        if (!swapped) break; // already sorted — exit early
+    }
+}
+
+public static void main(String[] args) {
+    int arr[] = {5, 1, 4, 2, 8};
+    bubbleSort(arr);
+    System.out.println("Sorted array:");
+    System.out.print(Arrays.toString(arr));
+}
+
+// Output:
+// Sorted array:
+// [1, 2, 4, 5, 8]
+
+// Time Complexity:
+//   Best Case    → O(n)   (already sorted, swapped stays false)
+//   Average Case → O(n²)
+//   Worst Case   → O(n²)</div>
+    </div>
+    <div class="mark-section" id="ms1_1">
+      <div class="mark-label">Enter your mark for this question</div>
+      <div class="mark-row">
+        <input class="mark-input" type="number" min="0" max="5" placeholder="0–5" id="mk1_1">
+        <span class="mark-max">/ 5</span>
+        <button class="btn-apply" onclick="applyMark('mk1_1',5,'bd1_1')">Apply</button>
+        <span class="mark-badge" id="bd1_1"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qcard">
+    <div class="qcard-head">
+      <div class="q-num">Question 2 &nbsp;·&nbsp; 5 marks</div>
+      <div class="q-text">
+        Implement a <strong>Stack using an Array</strong> in Java. Your <code>Stack</code> class must have a fixed size of <strong>3</strong> and support:<br>
+        <code>push(value)</code> · <code>pop()</code> · <code>isEmpty()</code> · <code>isFull()</code> · <code>print()</code><br><br>
+        <code>push</code> must print <em>"Stack Overflow"</em> when full. <code>pop</code> must print <em>"Empty Stack"</em> when empty.<br><br>
+        In <code>main</code>: push <code>5, 4, 10</code> → print the stack → pop twice → print again.
+        <div class="q-snippet">// Expected output:
+// 5 pushed into stack
+// 4 pushed into stack
+// 10 pushed into stack
+// Stack have: 10  4  5
+// ********
+// 10 removed from stack
+// 4  removed from stack
+// Stack have: 5</div>
+      </div>
+    </div>
+    <div class="ans-toggle-wrap">
+      <button class="btn-show-ans" onclick="toggleAnswer(this,'ap1_2','ms1_2')">
+        <span>👁 Show Answer</span><span class="arrow">▾</span>
+      </button>
+    </div>
+    <div class="answer-panel" id="ap1_2">
+      <div class="ans-hdr">✓ Model Answer</div>
+      <div class="ans-body">public class Stack {
+    int size = 3;
+    int top  = -1;
+    int a[]  = new int[size];
+
+    public void push(int value) {
+        if (isFull())
+            System.out.println("Stack Overflow");
+        else {
+            top++;
+            a[top] = value;
+            System.out.println(value + " pushed into stack");
+        }
+    }
+
+    public void pop() {
+        if (isEmpty())
+            System.out.println("Empty Stack");
+        else {
+            int v = a[top];
+            top--;
+            System.out.println(v + " removed from stack");
+        }
+    }
+
+    public boolean isEmpty() { return (top < 0); }
+    public boolean isFull()  { return (top >= size - 1); }
+
+    public void print() {
+        System.out.println("Stack have:");
+        for (int i = top; i > -1; i--)
+            System.out.println(a[i]);
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Stack s = new Stack();
+        s.push(5);
+        s.push(4);
+        s.push(10);
+        s.print();
+        System.out.println("********");
+        s.pop();
+        s.pop();
+        s.print();
+    }
+}
+// Stack is LIFO — Last In, First Out.
+// top starts at -1 (empty) and tracks the index of the top element.</div>
+    </div>
+    <div class="mark-section" id="ms1_2">
+      <div class="mark-label">Enter your mark for this question</div>
+      <div class="mark-row">
+        <input class="mark-input" type="number" min="0" max="5" placeholder="0–5" id="mk1_2">
+        <span class="mark-max">/ 5</span>
+        <button class="btn-apply" onclick="applyMark('mk1_2',5,'bd1_2')">Apply</button>
+        <span class="mark-badge" id="bd1_2"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-footer">
+    <button class="btn-quiz-submit" id="sub1" onclick="calcTotal(1)">Calculate Total Grade</button>
+    <button class="btn-reset" onclick="resetQuiz(1)">↺ Reset Quiz</button>
+  </div>
+  <div class="total-card" id="grade1"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     QUIZ 3 — Linked List & Searching
+══════════════════════════════════════════════ -->
+<div class="quiz-panel q3" id="panel2">
+  <div class="qhdr">
+    <div class="qhdr-icon">🔗</div>
+    <div class="qhdr-info">
+      <h2>Quiz 3 — Linked List &amp; Searching</h2>
+      <div class="qhdr-meta">
+        <span class="meta-pill">Labs 5 &amp; 3</span>
+        <span class="meta-pill">2 Questions</span>
+        <span class="meta-pill">10 Marks Total</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="qcard">
+    <div class="qcard-head">
+      <div class="q-num">Question 1 &nbsp;·&nbsp; 5 marks</div>
+      <div class="q-text">
+        Build a <strong>Singly Linked List</strong> in Java with a <code>Node</code> class and a <code>LinkedList</code> class.<br><br>
+        Implement all of: <code>addHead(value)</code> · <code>addTail(value)</code> · <code>add(value, index)</code> · <code>deleteHead()</code> · <code>deleteTail()</code> · <code>delete(index)</code> · <code>print()</code><br><br>
+        Run the exact sequence below in <code>main</code> and print the final list:
+        <div class="q-snippet">// addHead(10)    → [10]
+// addHead(5)     → [5, 10]
+// addHead(20)    → [20, 5, 10]
+// addTail(50)    → [20, 5, 10, 50]
+// addTail(60)    → [20, 5, 10, 50, 60]
+// add(100, 3)    → [20, 5, 10, 100, 50, 60]
+// deleteHead()   → [5, 10, 100, 50, 60]
+// deleteTail()   → [5, 10, 100, 50]
+// delete(2)      → [5, 10, 50]
+// print()        →  5   10   50</div>
+      </div>
+    </div>
+    <div class="ans-toggle-wrap">
+      <button class="btn-show-ans" onclick="toggleAnswer(this,'ap2_1','ms2_1')">
+        <span>👁 Show Answer</span><span class="arrow">▾</span>
+      </button>
+    </div>
+    <div class="answer-panel" id="ap2_1">
+      <div class="ans-hdr">✓ Model Answer</div>
+      <div class="ans-body">class Node {
+    int value;
+    Node next = null;
+    public Node(int value) { this.value = value; }
+}
+
+class LinkedList {
+    Node head = null;
+
+    public void print() {
+        Node i = head;
+        while (i != null) { System.out.println(i.value); i = i.next; }
+    }
+
+    public void addHead(int value) {
+        Node newNode = new Node(value);
+        newNode.next = head;
+        head = newNode;
+    }
+
+    public void addTail(int value) {
+        Node newNode = new Node(value);
+        Node i = head;
+        while (i.next != null) i = i.next;
+        i.next = newNode;
+    }
+
+    public void add(int value, int index) {
+        Node newNode = new Node(value);
+        Node i = head;
+        for (int count = 0; count < index - 1; count++) i = i.next;
+        newNode.next = i.next;
+        i.next = newNode;
+    }
+
+    public void deleteHead() { head = head.next; }
+
+    public void delete(int index) {
+        Node i = head;
+        for (int count = 0; count < index - 1; count++) i = i.next;
+        i.next = i.next.next;
+    }
+
+    public void deleteTail() {
+        Node i = head, j = head;
+        while (i.next != null) i = i.next;
+        while (j.next != i)    j = j.next;
+        j.next = null;
+    }
+}
+
+class TestList {
+    public static void main(String[] args) {
+        LinkedList l = new LinkedList();
+        l.addHead(10);
+        l.addHead(5);
+        l.addHead(20);
+        l.addTail(50);
+        l.addTail(60);
+        l.add(100, 3);
+        l.deleteHead();
+        l.deleteTail();
+        l.delete(2);
+        l.print();
+    }
+}
+// Output:
+// 5
+// 10
+// 50</div>
+    </div>
+    <div class="mark-section" id="ms2_1">
+      <div class="mark-label">Enter your mark for this question</div>
+      <div class="mark-row">
+        <input class="mark-input" type="number" min="0" max="5" placeholder="0–5" id="mk2_1">
+        <span class="mark-max">/ 5</span>
+        <button class="btn-apply" onclick="applyMark('mk2_1',5,'bd2_1')">Apply</button>
+        <span class="mark-badge" id="bd2_1"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qcard">
+    <div class="qcard-head">
+      <div class="q-num">Question 2 &nbsp;·&nbsp; 5 marks</div>
+      <div class="q-text">
+        Compare <strong>Linear Search</strong> and <strong>Binary Search</strong> by implementing both methods in the same Java file.<br><br>
+        In <code>main</code>, search for key <code>30</code> in array <code>{10, 25, 30, 45, 50}</code> using both and print the index each returns.<br><br>
+        Also write a <strong>comment block</strong> explaining: when should you prefer Binary Search over Linear Search, and why?
+        <div class="q-snippet">// Expected output:
+// Linear Search → Element found at index: 2
+// Binary Search → Element found at index: 2
+
+// Key difference:
+//   Linear → works on unsorted arrays, O(n)
+//   Binary → requires sorted array, O(log n) — much faster for large data</div>
+      </div>
+    </div>
+    <div class="ans-toggle-wrap">
+      <button class="btn-show-ans" onclick="toggleAnswer(this,'ap2_2','ms2_2')">
+        <span>👁 Show Answer</span><span class="arrow">▾</span>
+      </button>
+    </div>
+    <div class="answer-panel" id="ap2_2">
+      <div class="ans-hdr">✓ Model Answer</div>
+      <div class="ans-body">public static int linearSearch(int[] arr, int key) {
+    for (int i = 0; i < arr.length; i++) {
+        if (arr[i] == key) return i;
+    }
+    return -1;
+}
+
+public static int binarySearch(int[] arr, int key) {
+    int left = 0, right = arr.length - 1;
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        if (arr[mid] == key)     return mid;
+        else if (arr[mid] < key) left  = mid + 1;
+        else                     right = mid - 1;
+    }
+    return -1;
+}
+
+// When to prefer Binary Search over Linear Search?
+// ─────────────────────────────────────────────────
+// Use Binary Search when:
+//   1. The array is SORTED.
+//   2. The dataset is LARGE — e.g. for 1,000,000 elements:
+//      Linear takes up to 1,000,000 steps → O(n)
+//      Binary takes only ~20 steps        → O(log n)
+//
+// Use Linear Search when:
+//   - The array is unsorted.
+//   - The dataset is very small (overhead not worth it).
+
+public static void main(String[] args) {
+    int[] arr = {10, 25, 30, 45, 50};
+    int key = 30;
+    System.out.println("Linear Search → Element found at index: " + linearSearch(arr, key));
+    System.out.println("Binary Search → Element found at index: " + binarySearch(arr, key));
+}
+// Output:
+// Linear Search → Element found at index: 2
+// Binary Search → Element found at index: 2</div>
+    </div>
+    <div class="mark-section" id="ms2_2">
+      <div class="mark-label">Enter your mark for this question</div>
+      <div class="mark-row">
+        <input class="mark-input" type="number" min="0" max="5" placeholder="0–5" id="mk2_2">
+        <span class="mark-max">/ 5</span>
+        <button class="btn-apply" onclick="applyMark('mk2_2',5,'bd2_2')">Apply</button>
+        <span class="mark-badge" id="bd2_2"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-footer">
+    <button class="btn-quiz-submit" id="sub2" onclick="calcTotal(2)">Calculate Total Grade</button>
+    <button class="btn-reset" onclick="resetQuiz(2)">↺ Reset Quiz</button>
+  </div>
+  <div class="total-card" id="grade2"></div>
+</div>
+
+
+<script>
+/* ── TAB SWITCHING ── */
+function switchTab(idx){
+  document.querySelectorAll('.quiz-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── TOGGLE ANSWER ── */
+function toggleAnswer(btn, apId, msId){
+  const ap = document.getElementById(apId);
+  const ms = document.getElementById(msId);
+  const open = ap.classList.toggle('open');
+  btn.classList.toggle('revealed', open);
+  btn.querySelector('span:first-child').textContent = open ? '🙈 Hide Answer' : '👁 Show Answer';
+  if(open) ms.classList.add('open');
+}
+
+/* ── PER-QUESTION MARK BADGE ── */
+function applyMark(inputId, max, badgeId){
+  const val = parseFloat(document.getElementById(inputId).value);
+  const badge = document.getElementById(badgeId);
+  if(isNaN(val) || val < 0 || val > max){
+    badge.className='mark-badge show redo';
+    badge.textContent='⚠ Enter 0–'+max;
+    return;
+  }
+  const pct = val / max; // fraction of this question
+  // per-question rating thresholds scaled to question max
+  const halfMax = max * 0.5;
+  const sevMax  = max * 0.7;
+  if(val >= sevMax){
+    badge.className='mark-badge show excellent';
+    badge.textContent='✓ '+val+'/'+max;
+  } else if(val >= halfMax){
+    badge.className='mark-badge show good';
+    badge.textContent='~ '+val+'/'+max;
+  } else {
+    badge.className='mark-badge show redo';
+    badge.textContent='✗ '+val+'/'+max;
+  }
+  badge.style.display='inline-flex';
+}
+
+/* ── TOTAL GRADE ── */
+function calcTotal(qi){
+  const v1 = parseFloat(document.getElementById(`mk${qi}_1`).value);
+  const v2 = parseFloat(document.getElementById(`mk${qi}_2`).value);
+
+  if(isNaN(v1) || isNaN(v2)){
+    alert('Please reveal both answers and enter your marks before calculating the grade.');
+    return;
+  }
+  if(v1<0||v1>5||v2<0||v2>5){
+    alert('Each question is out of 5. Please enter values between 0 and 5.');
+    return;
+  }
+
+  const total = v1 + v2;
+  const gc = document.getElementById(`grade${qi}`);
+  let cls, col, msg, sub, emoji;
+
+  if(total >= 7){
+    cls='g-perfect'; col='var(--green2)';
+    emoji='🎉'; msg='Excellent!';
+    sub='Outstanding performance — keep it up!';
+  } else if(total >= 5){
+    cls='g-good'; col='var(--accent2)';
+    emoji='👍'; msg='Good';
+    sub='Solid work! Review any gaps in the model answers.';
+  } else {
+    cls='g-redo'; col='var(--red)';
+    emoji='🔁'; msg='Redo the Quiz';
+    sub='Go back through the lab material and try again.';
+  }
+
+  gc.className='total-card show';
+  gc.innerHTML=`
+    <div class="total-circle ${cls}">
+      <div class="total-big" style="color:${col}">${total}</div>
+      <div class="total-denom">/10</div>
+    </div>
+    <div class="total-msg">${emoji} ${msg}</div>
+    <div class="total-sub">${sub}</div>
+    <div style="margin-top:.8rem;font-size:.78rem;color:var(--text3);font-family:var(--mono)">Q1: ${v1}/5 &nbsp;·&nbsp; Q2: ${v2}/5</div>
+    <div style="margin-top:.5rem;font-size:.72rem;color:var(--text3)">
+      ${total>=7?'✅ 7–10 Excellent':''}${total>=5&&total<7?'✅ 5–7 Good':''}${total<5?'🔁 0–5 Redo the Quiz':''}
+    </div>`;
+
+  document.getElementById(`sub${qi}`).disabled = true;
+}
+
+/* ── RESET ── */
+function resetQuiz(qi){
+  ['1','2'].forEach(q=>{
+    // close answer panels
+    const ap = document.getElementById(`ap${qi}_${q}`);
+    const ms = document.getElementById(`ms${qi}_${q}`);
+    ap.classList.remove('open');
+    ms.classList.remove('open');
+    // reset toggle button
+    const btn = ms.previousElementSibling.previousElementSibling.querySelector('.btn-show-ans');
+    if(btn){
+      btn.classList.remove('revealed');
+      btn.querySelector('span:first-child').textContent='👁 Show Answer';
+    }
+    // clear mark input & badge
+    document.getElementById(`mk${qi}_${q}`).value='';
+    const bd = document.getElementById(`bd${qi}_${q}`);
+    bd.className='mark-badge';
+    bd.textContent='';
+  });
+  document.getElementById(`grade${qi}`).className='total-card';
+  document.getElementById(`grade${qi}`).innerHTML='';
+  document.getElementById(`sub${qi}`).disabled=false;
+}
+</script>
+</body>
+</html>
