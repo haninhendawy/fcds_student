@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practical Quiz in OOP — by Eng: Hanin Hendawy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@400;500;600;700&display=swap');
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--border:#30363d;--accent:#f78166;--accent2:#79c0ff;--accent3:#7ee787;--text:#e6edf3;--muted:#8b949e;--correct:#1a4a2e;--correct-border:#3fb950;--correct-text:#7ee787;--wrong:#4a1818;--wrong-border:#f85149;--wrong-text:#ff7b72;--selected:#1c3a5c;--selected-border:#79c0ff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+.hero{background:linear-gradient(135deg,#0d1117 0%,#1a1f2e 50%,#0d1117 100%);border-bottom:1px solid var(--border);padding:32px 24px 28px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(121,192,255,.06) 0%,transparent 70%);pointer-events:none;}
+.hero::after{content:'';position:absolute;bottom:-40px;right:-40px;width:250px;height:250px;background:radial-gradient(circle,rgba(247,129,102,.06) 0%,transparent 70%);pointer-events:none;}
+.badge{display:inline-block;background:rgba(121,192,255,.1);border:1px solid rgba(121,192,255,.3);color:var(--accent2);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:12px;}
+.hero h1{font-size:clamp(20px,4vw,32px);font-weight:700;letter-spacing:-.5px;margin-bottom:6px;background:linear-gradient(90deg,var(--text) 60%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{color:var(--muted);font-size:13px;max-width:480px;margin:0 auto;}
+.author{color:var(--accent);font-size:12px;font-weight:600;margin-top:8px;}
+.tabs{display:flex;justify-content:center;gap:8px;padding:16px;flex-wrap:wrap;background:var(--surface);border-bottom:1px solid var(--border);}
+.tab-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:10px 24px;border-radius:8px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+.tab-btn:hover{border-color:var(--accent2);color:var(--text);}
+.tab-btn.active{background:linear-gradient(135deg,#1f6feb,#388bfd);border-color:#388bfd;color:white;}
+.tab-content{display:none;max-width:800px;margin:0 auto;padding:24px 16px 80px;}
+.tab-content.active{display:block;}
+.quiz-section-title{font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text);}
+.quiz-desc{color:var(--muted);font-size:13px;margin-bottom:20px;}
+.question-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;transition:border-color .2s;}
+.question-card:hover{border-color:#444c56;}
+.q-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.q-num{background:rgba(121,192,255,.1);border:1px solid rgba(121,192,255,.2);color:var(--accent2);font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.q-text{font-size:14px;font-weight:500;line-height:1.6;flex:1;}
+.marks-badge{display:inline-block;background:rgba(247,129,102,.15);border:1px solid rgba(247,129,102,.35);color:var(--accent);font-size:9px;font-weight:700;letter-spacing:.8px;padding:1px 6px;border-radius:3px;vertical-align:middle;margin-left:6px;}
+.code-block{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:10px 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;overflow-x:auto;white-space:pre;color:#e6edf3;}
+.kw{color:#ff7b72;}.cls{color:#79c0ff;}.fn{color:#d2a8ff;}.str{color:#a5d6ff;}.cm{color:#8b949e;font-style:italic;}.num{color:#f2cc60;}
+.options{display:flex;flex-direction:column;gap:6px;margin-top:12px;}
+.option{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:all .15s;background:var(--surface2);user-select:none;}
+.option:hover{border-color:#444c56;background:#212830;}
+.option.selected{background:var(--selected);border-color:var(--selected-border);}
+.option.correct{background:var(--correct);border-color:var(--correct-border);}
+.option.wrong{background:var(--wrong);border-color:var(--wrong-border);}
+.opt-letter{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;min-width:20px;height:20px;border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);margin-top:1px;flex-shrink:0;}
+.option.selected .opt-letter{border-color:var(--accent2);color:var(--accent2);}
+.option.correct .opt-letter{border-color:var(--correct-border);color:var(--correct-text);}
+.option.wrong .opt-letter{border-color:var(--wrong-border);color:var(--wrong-text);}
+.opt-text{font-size:13px;line-height:1.5;flex:1;}
+.btn-show-answer{background:rgba(247,129,102,.15);border:1px solid rgba(247,129,102,.35);color:var(--accent);padding:8px 16px;border-radius:6px;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:12px;}
+.btn-show-answer:hover{background:rgba(247,129,102,.25);}
+.btn-show-answer:disabled{opacity:.4;cursor:not-allowed;}
+.answer-box{display:none;margin-top:14px;padding:14px 16px;background:rgba(126,231,135,.04);border:1px solid var(--correct-border);border-radius:8px;}
+.answer-box.show{display:block;}
+.answer-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--correct-text);margin-bottom:8px;}
+.answer-text{font-size:14px;color:#a5d6ff;line-height:1.6;}
+.grade-section{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.grade-section.show{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.grade-label{font-size:13px;color:var(--muted);}
+.grade-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-family:'Sora',sans-serif;font-size:14px;width:80px;text-align:center;}
+.grade-input:focus{outline:none;border-color:var(--accent2);}
+.grade-max{font-size:13px;color:var(--muted);}
+.result-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;margin-bottom:24px;}
+.result-panel.show{display:block;}
+.score-circle{width:120px;height:120px;border-radius:50%;margin:0 auto 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid var(--accent3);background:rgba(126,231,135,.06);}
+.score-num{font-size:32px;font-weight:700;color:var(--accent3);line-height:1;}
+.score-denom{font-size:12px;color:var(--muted);}
+.score-pct{font-size:12px;font-weight:600;color:var(--accent3);margin-top:2px;}
+.result-grade{font-size:20px;font-weight:700;margin-bottom:6px;}
+.result-msg{color:var(--muted);font-size:14px;margin-bottom:20px;}
+.btn-retry{background:transparent;color:var(--accent2);border:1px solid rgba(121,192,255,.3);padding:10px 24px;border-radius:8px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-retry:hover{background:rgba(121,192,255,.08);}
+.submit-zone{position:sticky;bottom:0;background:linear-gradient(to top,var(--bg) 70%,transparent);padding:20px 0 12px;text-align:center;}
+.progress-bar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;}
+.progress-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent3));border-radius:3px;transition:width .3s;width:0%;}
+.progress-text{font-size:12px;color:var(--muted);white-space:nowrap;}
+.btn-submit{background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;padding:12px 40px;border-radius:8px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px;}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(56,139,253,.35);}
+.btn-submit:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Practical Quiz in OOP</div>
+  <h1>Practical Quiz in OOP</h1>
+  <p>10 questions per quiz — Covering 8 Labs + Abstract Class, Methods & Interface</p>
+  <div class="author">by Eng: Hanin Hendawy</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab(1)">Quiz 1</button>
+  <button class="tab-btn" onclick="showTab(2)">Quiz 2</button>
+  <button class="tab-btn" onclick="showTab(3)">Quiz 3</button>
+</div>
+
+<!-- Quiz 1 -->
+<div class="tab-content active" id="quiz1">
+  <div class="quiz-section-title">Quiz 1 — Classes, Objects, Encapsulation & Inheritance Basics</div>
+  <div class="quiz-desc">10 marks total — Click "Show Answer" to reveal, then grade yourself</div>
+  <div class="result-panel" id="result1">
+    <div class="score-circle">
+      <span class="score-num" id="score1">0</span>
+      <span class="score-denom">/10</span>
+      <span class="score-pct" id="pct1">0%</span>
+    </div>
+    <div class="result-grade" id="grade1"></div>
+    <div class="result-msg" id="msg1"></div>
+    <button class="btn-retry" onclick="retryQuiz(1)">Retry Quiz</button>
+  </div>
+  <div id="questions1"></div>
+  <div class="submit-zone">
+    <div class="progress-bar-wrap">
+      <span class="progress-text" id="progress1">0 / 10 answered</span>
+      <div class="progress-bar"><div class="progress-fill" id="fill1"></div></div>
+    </div>
+    <button class="btn-submit" onclick="submitQuiz(1)">Submit & See Results</button>
+  </div>
+</div>
+
+<!-- Quiz 2 -->
+<div class="tab-content" id="quiz2">
+  <div class="quiz-section-title">Quiz 2 — Inheritance, Polymorphism & Method Overriding</div>
+  <div class="quiz-desc">10 marks total — Click "Show Answer" to reveal, then grade yourself</div>
+  <div class="result-panel" id="result2">
+    <div class="score-circle">
+      <span class="score-num" id="score2">0</span>
+      <span class="score-denom">/10</span>
+      <span class="score-pct" id="pct2">0%</span>
+    </div>
+    <div class="result-grade" id="grade2"></div>
+    <div class="result-msg" id="msg2"></div>
+    <button class="btn-retry" onclick="retryQuiz(2)">Retry Quiz</button>
+  </div>
+  <div id="questions2"></div>
+  <div class="submit-zone">
+    <div class="progress-bar-wrap">
+      <span class="progress-text" id="progress2">0 / 10 answered</span>
+      <div class="progress-bar"><div class="progress-fill" id="fill2"></div></div>
+    </div>
+    <button class="btn-submit" onclick="submitQuiz(2)">Submit & See Results</button>
+  </div>
+</div>
+
+<!-- Quiz 3 -->
+<div class="tab-content" id="quiz3">
+  <div class="quiz-section-title">Quiz 3 — Abstract Classes, Interfaces & Advanced OOP</div>
+  <div class="quiz-desc">10 marks total — Click "Show Answer" to reveal, then grade yourself</div>
+  <div class="result-panel" id="result3">
+    <div class="score-circle">
+      <span class="score-num" id="score3">0</span>
+      <span class="score-denom">/10</span>
+      <span class="score-pct" id="pct3">0%</span>
+    </div>
+    <div class="result-grade" id="grade3"></div>
+    <div class="result-msg" id="msg3"></div>
+    <button class="btn-retry" onclick="retryQuiz(3)">Retry Quiz</button>
+  </div>
+  <div id="questions3"></div>
+  <div class="submit-zone">
+    <div class="progress-bar-wrap">
+      <span class="progress-text" id="progress3">0 / 10 answered</span>
+      <div class="progress-bar"><div class="progress-fill" id="fill3"></div></div>
+    </div>
+    <button class="btn-submit" onclick="submitQuiz(3)">Submit & See Results</button>
+  </div>
+</div>
+
+<script>
+const kw=s=>`<span class="kw">${s}</span>`;
+const cls=s=>`<span class="cls">${s}</span>`;
+const fn=s=>`<span class="fn">${s}</span>`;
+const str=s=>`<span class="str">${s}</span>`;
+const num=s=>`<span class="num">${s}</span>`;
+
+const Q1=[
+{s:"Classes & Objects",q:"What is the output?",marks:1,
+code:`${kw('class')} ${cls('Person')} {
+    ${cls('String')} name;
+    ${cls('Person')}(${cls('String')} n) { name = n; }
+}
+${cls('Person')} p = ${kw('new')} ${cls('Person')}(${str('"Ali"')});
+${cls('System')}.out.println(p.name);`,
+opts:["null","Ali","Compile error","Runtime error"],
+ans:1,exp:"Constructor sets name to the passed argument 'Ali'. Output: Ali"},
+
+{s:"Encapsulation",q:"What is the output?",marks:1,
+code:`${kw('class')} ${cls('BankAccount')} {
+    ${kw('private')} ${cls('double')} balance = ${num('100')};
+    ${kw('public double')} ${fn('getBalance')}() { ${kw('return')} balance; }
+}
+${cls('BankAccount')} acc = ${kw('new')} ${cls('BankAccount')}();
+${cls('System')}.out.println(acc.balance);`,
+opts:["100","0","Compile error","null"],
+ans:2,exp:"balance is private and cannot be accessed directly. Compile error: balance has private access in BankAccount"},
+
+{s:"Constructors",q:"What is printed?",marks:1,
+code:`${kw('class')} ${cls('Widget')} {
+    ${cls('Widget')}() { ${cls('System')}.out.println(${str('"A"')}); }
+    ${cls('Widget')}(${kw('int')} x) { ${cls('System')}.out.println(${str('"B"')}); }
+}
+${kw('new')} ${cls('Widget')}(${num('5')});`,
+opts:["A","B","AB","Compile error"],
+ans:1,exp:"new Widget(5) calls the parameterized constructor Widget(int). Output: B"},
+
+{s:"This Keyword",q:"What is the output?",marks:1,
+code:`${kw('class')} ${cls('Point')} {
+    ${kw('int')} x, y;
+    ${cls('Point')}(${kw('int')} x, ${kw('int')} y) {
+        ${kw('this')}.x = x;
+        ${kw('this')}.y = y;
+    }
+}
+${cls('Point')} p = ${kw('new')} ${cls('Point')}(${num('3')}, ${num('4')});
+${cls('System')}.out.println(p.x + ${str('" "')} + p.y);`,
+opts:["3 4","0 0","null null","Compile error"],
+ans:0,exp:"this.x refers to the instance field, x is the parameter. Values 3 and 4 are assigned. Output: 3 4"},
+
+{s:"Inheritance Basics",q:"What is the output?",marks:1,
+code:`${kw('class')} ${cls('Animal')} {
+    ${kw('void')} ${fn('sound')}() { ${cls('System')}.out.println(${str('"Animal"')}); }
+}
+${kw('class')} ${cls('Dog')} ${kw('extends')} ${cls('Animal')} {}
+${kw('new')} ${cls('Dog')}().${fn('sound')}();`,
+opts:["Animal","Dog","null","Compile error"],
+ans:0,exp:"Dog inherits sound() from Animal. Output: Animal"},
+
+{s:"Super Keyword",q:"What is printed?",marks:1,
+code:`${kw('class')} ${cls('Base')} {
+    ${cls('String')} msg = ${str('"Base"')};
+}
+${kw('class')} ${cls('Child')} ${kw('extends')} ${cls('Base')} {
+    ${cls('String')} msg = ${str('"Child"')};
+    ${kw('void')} ${fn('show')}() {
+        ${cls('System')}.out.println(${kw('super')}.msg);
+    }
+}
+${kw('new')} ${cls('Child')}().${fn('show')}();`,
+opts:["Base","Child","null","Compile error"],
+ans:0,exp:"super.msg refers to the parent's msg field. Output: Base"},
+
+{s:"Method Overloading",q:"Which method is called?",marks:1,
+code:`${kw('class')} ${cls('Calc')} {
+    ${kw('void')} ${fn('add')}(${cls('int')} a, ${cls('int')} b) { ${cls('System')}.out.println(a+b); }
+    ${kw('void')} ${fn('add')}(${cls('double')} a, ${cls('double')} b) { ${cls('System')}.out.println(a+b); }
+}
+${kw('new')} ${cls('Calc')}().${fn('add')}(${num('2')}, ${num('3')});`,
+opts:["add(int,int)","add(double,double)","Both","Compile error"],
+ans:0,exp:"Both arguments are int literals, so add(int,int) is resolved at compile time. Output: 5"},
+
+{s:"Static Members",q:"What is output?",marks:1,
+code:`${kw('class')} ${cls('Counter')} {
+    ${kw('static int')} count = ${num('0')};
+    ${cls('Counter')}() { count++; }
+}
+${kw('new')} ${cls('Counter')}();
+${kw('new')} ${cls('Counter')}();
+${cls('System')}.out.println(${cls('Counter')}.count);`,
+opts:["2","0","1","Compile error"],
+ans:0,exp:"Static field is shared. Each constructor call increments count. count=2. Output: 2"},
+
+{s:"Package & Access",q:"Can subclass access protected member?",marks:1,
+code:`${kw('package')} ${str('pkg1')};
+${kw('class')} ${cls('Parent')} {
+    ${kw('protected int')} x = ${num('5')};
+}
+${kw('package')} ${str('pkg2')};
+${kw('class')} ${cls('Child')} ${kw('extends')} ${cls('Parent')} {
+    ${kw('void')} ${fn('test')}() { ${cls('System')}.out.println(x); }
+}`,
+opts:["Yes, always","Only from same package","No, never","Compile error"],
+ans:0,exp:"Protected members are accessible in subclasses even in different packages. Output: Yes, always"},
+
+{s:"Constructors & Inheritance",q:"What is printed?",marks:1,
+code:`${kw('class')} ${cls('A')} {
+    ${cls('A')}() { ${cls('System')}.out.println(${str('"A"')}); }
+}
+${kw('class')} ${cls('B')} ${kw('extends')} ${cls('A')} {
+    ${cls('B')}() { ${cls('System')}.out.println(${str('"B"')}); }
+}
+${kw('new')} ${cls('B')}();`,
+opts:["B","A B","A","Compile error"],
+ans:1,exp:"B() constructor implicitly calls super() first. Parent constructor runs before child. Output: A B"}
+];
+
+const Q2=[
+{s:"Polymorphism",q:"What is the output?",marks:1,
+code:`${kw('class')} ${cls('Shape')} {
+    ${kw('void')} ${fn('draw')}() { ${cls('System')}.out.println(${str('"Shape"')}); }
+}
+${kw('class')} ${cls('Circle')} ${kw('extends')} ${cls('Shape')} {
+    ${kw('void')} ${fn('draw')}() { ${cls('System')}.out.println(${str('"Circle"')}); }
+}
+${cls('Shape')} s = ${kw('new')} ${cls('Circle')}();
+s.${fn('draw')}();`,
+opts:["Shape","Circle","Compile error","None"],
+ans:1,exp:"Dynamic method dispatch uses actual object type (Circle). Output: Circle"},
+
+{s:"Upcasting",q:"What is printed?",marks:1,
+code:`${kw('class')} ${cls('Vehicle')} {
+    ${kw('void')} ${fn('move')}() { ${cls('System')}.out.println(${str('"Move"')}); }
+}
+${kw('class')} ${cls('Car')} ${kw('extends')} ${cls('Vehicle')} {
+    ${kw('void')} ${fn('drive')}() { ${cls('System')}.out.println(${str('"Drive"')}); }
+}
+${cls('Vehicle')} v = ${kw('new')} ${cls('Car')}();
+${cls('Car')} c = (${cls('Car')}) v;
+c.${fn('drive')}();`,
+opts:["Move","Drive","Compile error","Runtime error"],
+ans:1,exp:"Downcast works because actual object is Car. Car.drive() is accessible. Output: Drive"},
+
+{s:"Method Override",q:"Which compile error occurs?",marks:1,
+code:`${kw('class')} ${cls('Base')} {
+    ${kw('void')} ${fn('show')}() {}
+}
+${kw('class')} ${cls('Sub')} ${kw('extends')} ${cls('Base')} {
+    ${kw('public void')} ${fn('show')}() {}
+}`,
+opts:["No error","Return type mismatch","Access modifier conflict","Method not found"],
+ans:0,exp:"Widening access modifier (private→public) is allowed. No error."},
+
+{s:"Final Methods",q:"What happens?",marks:1,
+code:`${kw('class')} ${cls('Animal')} {
+    ${kw('final void')} ${fn('eat')}() { ${cls('System')}.out.println(${str('"Eat"')}); }
+}
+${kw('class')} ${cls('Dog')} ${kw('extends')} ${cls('Animal')} {
+    ${kw('void')} ${fn('eat')}() { ${cls('System')}.out.println(${str('"Eat more"')}); }
+}`,
+opts:["Compiles","Compile error - final method cannot be overridden","Runtime error","Works with warning"],
+ans:1,exp:"Final methods cannot be overridden. Compile error"},
+
+{s:"Override Rules",q:"What is NOT allowed when overriding?",marks:1,
+code:`${kw('class')} ${cls('Parent')} {
+    ${kw('void')} ${fn('process')}(${cls('int')} x) {}
+}
+${kw('class')} ${cls('Child')} ${kw('extends')} ${cls('Parent')} {
+    ${kw('double')} ${fn('process')}(${cls('int')} x) { ${kw('return')} ${num('0')}; }
+}`,
+opts:["Same return type","Narrower exception","Widening access","Change parameter count"],
+ans:0,exp:"Changing return type from void to double breaks override rules. Compile error"},
+
+{s:"Instanceof",q:"What is output?",marks:1,
+code:`${kw('class')} ${cls('A')}{}
+${kw('class')} ${cls('B')} ${kw('extends')} ${cls('A')}{}
+${cls('A')} a = ${kw('new')} ${cls('B')}();
+${cls('System')}.out.println(a ${kw('instanceof')} ${cls('B')});`,
+opts:["true","false","Compile error","Runtime error"],
+ans:0,exp:"instanceof checks actual runtime type. B is the actual type. Output: true"},
+
+{s:"Override vs Overload",q:"What is the output?",marks:1,
+code:`${kw('class')} ${cls('Printer')} {
+    ${kw('void')} ${fn('print')}(${cls('String')} s) { ${cls('System')}.out.println(${str('"String"')}); }
+}
+${kw('class')} ${cls('LaserPrinter')} ${kw('extends')} ${cls('Printer')} {
+    ${kw('void')} ${fn('print')}(${cls('Object')} o) { ${cls('System')}.out.println(${str('"Object"')}); }
+}
+${kw('new')} ${cls('LaserPrinter')}().${fn('print')}(${str('"hi"')});`,
+opts:["String","Object","Compile error","None"],
+ans:0,exp:"Compile-time resolution for overloading. String argument matches print(String). Output: String"},
+
+{s:"Polymorphism in Array",q:"What is printed?",marks:1,
+code:`${kw('class')} ${cls('Animal')} {
+    ${kw('void')} ${fn('speak')}() { ${cls('System')}.out.println(${str('"X"')}); }
+}
+${kw('class')} ${cls('Cat')} ${kw('extends')} ${cls('Animal')} {
+    ${kw('void')} ${fn('speak')}() { ${cls('System')}.out.println(${str('"Meow"')}); }
+}
+${kw('class')} ${cls('Dog')} ${kw('extends')} ${cls('Animal')} {
+    ${kw('void')} ${fn('speak')}() { ${cls('System')}.out.println(${str('"Woof"')}); }
+}
+${cls('Animal')}[] arr = {${kw('new')} ${cls('Cat')}(), ${kw('new')} ${cls('Dog')}(), ${kw('new')} ${cls('Animal')}()};
+${kw('for')}(${cls('Animal')} a : arr) a.${fn('speak')}();`,
+opts:["X X X","Meow Woof X","Compile error","Meow Woof Meow"],
+ans:1,exp:"Each element uses dynamic dispatch to its actual type. Output: Meow Woof X"},
+
+{s:"Covariant Return",q:"What is output?",marks:1,
+code:`${kw('class')} ${cls('Parent')} {
+    ${cls('Parent')} ${fn('create')}() { ${kw('return new')} ${cls('Parent')}(); }
+}
+${kw('class')} ${cls('Child')} ${kw('extends')} ${cls('Parent')} {
+    ${cls('Child')} ${fn('create')}() { ${kw('return new')} ${cls('Child')}(); }
+}
+${cls('Parent')} p = ${kw('new')} ${cls('Child')}();
+${cls('System')}.out.println(p.${fn('create')}().getClass().getSimpleName());`,
+opts:["Parent","Child","Compile error","Runtime error"],
+ans:1,exp:"Override with covariant return (Child instead of Parent) is allowed. Output: Child"},
+
+{s:"Runtime Dispatch",q:"What is printed?",marks:1,
+code:`${kw('class')} ${cls('Base')} {
+    ${kw('int')} x = ${num('5')};
+    ${kw('void')} ${fn('show')}() { ${cls('System')}.out.println(${str('"Base"')} + x); }
+}
+${kw('class')} ${cls('Derived')} ${kw('extends')} ${cls('Base')} {
+    ${kw('int')} x = ${num('10')};
+    ${kw('void')} ${fn('show')}() { ${cls('System')}.out.println(${str('"Derived"')} + x); }
+}
+${cls('Base')} b = ${kw('new')} ${cls('Derived')}();
+b.${fn('show')}();`,
+opts:["Base5","Derived10","Base10","Derived5"],
+ans:1,exp:"Method dispatch uses Derived.show(). Field x is not polymorphic - still 10 from Derived. Output: Derived10"}
+];
+
+const Q3=[
+{s:"Abstract Classes",q:"What is the output?",marks:1,
+code:`${kw('abstract class')} ${cls('Shape')} {
+    ${kw('abstract double')} ${fn('area')}();
+}
+${kw('class')} ${cls('Circle')} ${kw('extends')} ${cls('Shape')} {
+    ${kw('double')} r = ${num('2')};
+    ${kw('double')} ${fn('area')}() { ${kw('return')} ${num('3.14')}; }
+}
+${cls('Shape')} s = ${kw('new')} ${cls('Circle')}();
+${cls('System')}.out.println(s.${fn('area')}());`,
+opts:["3.14","0.0","Compile error","null"],
+ans:0,exp:"Abstract method is implemented. Dynamic dispatch calls Circle.area(). Output: 3.14"},
+
+{s:"Abstract Constructor",q:"Can abstract class have constructor?",marks:1,
+code:`${kw('abstract class')} ${cls('Vehicle')} {
+    ${kw('protected')} ${cls('String')} type;
+    ${kw('protected')} ${cls('Vehicle')}(${cls('String')} t) { type = t; }
+}
+${kw('class')} ${cls('Bike')} ${kw('extends')} ${cls('Vehicle')} {
+    ${kw('public')} ${cls('Bike')}() { ${kw('super')}(${str('"Bike"')}); }
+}
+${cls('System')}.out.println(${kw('new')} ${cls('Bike')}().type);`,
+opts:["Bike","null","Compile error","None"],
+ans:0,exp:"Abstract classes can have constructors, called via super() from subclass. Output: Bike"},
+
+{s:"Interface Basics",q:"What is output?",marks:1,
+code:`${kw('interface')} ${cls('Drawable')} {
+    ${kw('void')} ${fn('draw')}();
+}
+${kw('class')} ${cls('Square')} ${kw('implements')} ${cls('Drawable')} {
+    ${kw('public void')} ${fn('draw')}() { ${cls('System')}.out.println(${str('"Draw square"')}); }
+}
+${cls('Drawable')} d = ${kw('new')} ${cls('Square')}();
+d.${fn('draw')}();`,
+opts:["Draw square","Compile error","Runtime error","None"],
+ans:0,exp:"Interface reference can hold implementing class object. Output: Draw square"},
+
+{s:"Multiple Interfaces",q:"What compiles?",marks:1,
+code:`${kw('interface')} ${cls('A')} { ${kw('void')} ${fn('method')}(); }
+${kw('interface')} ${cls('B')} { ${kw('void')} ${fn('method')}(); }
+${kw('class')} ${cls('C')} ${kw('implements')} ${cls('A')}, ${cls('B')} {
+    ${kw('public void')} ${fn('method')}() { ${cls('System')}.out.println(${str('"OK"')}); }
+}`,
+opts:["Compiles","Only one interface","Needs different method names","Compile error"],
+ans:0,exp:"Java allows implementing multiple interfaces with one method. Output: Compiles"},
+
+{s:"Interface Variables",q:"What is output?",marks:1,
+code:`${kw('interface')} ${cls('Constants')} {
+    ${kw('int')} MAX = ${num('100')};
+}
+${kw('class')} ${cls('Test')} {
+    ${kw('void')} ${fn('check')}() {
+        ${cls('Constants')}.MAX = ${num('200')};
+    }
+}`,
+opts:["Compiles","Compile error - final field","Runtime error","None"],
+ans:1,exp:"Interface fields are implicitly public static final (constants). Cannot be changed. Compile error"},
+
+{s:"Default Methods",q:"What is output?",marks:1,
+code:`${kw('interface')} ${cls('Flyable')} {
+    ${kw('default void')} ${fn('fly')}() { ${cls('System')}.out.println(${str('"Flying"')}); }
+}
+${kw('class')} ${cls('Bird')} ${kw('implements')} ${cls('Flyable')} {}
+${kw('new')} ${cls('Bird')}().${fn('fly')}();`,
+opts:["Flying","Compile error","Runtime error","None"],
+ans:0,exp:"Default methods provide implementation. Class inherits it automatically. Output: Flying"},
+
+{s:"Static Interface Methods",q:"What compiles?",marks:1,
+code:`${kw('interface')} ${cls('Utils')} {
+    ${kw('static int')} ${fn('add')}(${kw('int')} a, ${kw('int')} b) { ${kw('return')} a + b; }
+}
+${cls('System')}.out.println(${cls('Utils')}.${fn('add')}(${num('2')}, ${num('3')}));`,
+opts:["5","Compile error","Runtime error","None"],
+ans:0,exp:"Static methods in interfaces are called via interface name. Output: 5"},
+
+{s:"Abstract vs Interface",q:"When to use abstract class?",marks:1,
+code:null,
+opts:["When you need shared state/fields","When you need multiple inheritance","When you only need method signatures","Always use interface"],
+ans:0,exp:"Abstract classes for shared state and constructors. Interfaces for contracts only."},
+
+{s:"Interface Extends",q:"What is output?",marks:1,
+code:`${kw('interface')} ${cls('Read')} { ${kw('void')} ${fn('read')}(); }
+${kw('interface')} ${cls('Write')} ${kw('extends')} ${cls('Read')} {
+    ${kw('void')} ${fn('write')}();
+}
+${kw('class')} ${cls('File')} ${kw('implements')} ${cls('Write')} {
+    ${kw('public void')} ${fn('read')}() { ${cls('System')}.out.println(${str('"R"')}); }
+    ${kw('public void')} ${fn('write')}() { ${cls('System')}.out.println(${str('"W"')}); }
+}
+${kw('new')} ${cls('File')}().${fn('read')}();`,
+opts:["R","W","Compile error","None"],
+ans:0,exp:"Interface can extend another interface. Class implements child interface needs both methods. Output: R"},
+
+{s:"Polymorphism with Interfaces",q:"What is printed?",marks:1,
+code:`${kw('interface')} ${cls('Logger')} {
+    ${kw('void')} ${fn('log')}(${cls('String')} m);
+}
+${kw('class')} ${cls('FileLogger')} ${kw('implements')} ${cls('Logger')} {
+    ${kw('public void')} ${fn('log')}(${cls('String')} m) { ${cls('System')}.out.println(${str('"File: "')} + m); }
+}
+${kw('class')} ${cls('ConsoleLogger')} ${kw('implements')} ${cls('Logger')} {
+    ${kw('public void')} ${fn('log')}(${cls('String')} m) { ${cls('System')}.out.println(${str('"Console: "')} + m); }
+}
+${cls('Logger')}[] logs = {${kw('new')} ${cls('FileLogger')}(), ${kw('new')} ${cls('ConsoleLogger')}()};
+${kw('for')}(${cls('Logger')} l : logs) l.${fn('log')}(${str('"test"')});`,
+opts:["File: test twice","Console: test twice","File: test then Console: test","Compile error"],
+ans:2,exp:"Array holds both types, each dispatches to its implementation. Output: File: test / Console: test"}
+];
+
+let currentTab = 1;
+let userGrades = {1:{},2:{},3:{}};
+
+function renderQuiz(quizNum, questions) {
+    const container = document.getElementById('questions' + quizNum);
+    container.innerHTML = questions.map((q, i) => `
+        <div class="question-card" id="q${quizNum}_${i}">
+            <div class="q-header">
+                <span class="q-num">Q${i+1}</span>
+                <span class="q-text">${q.q}<span class="marks-badge">${q.marks} mark${q.marks>1?'s':''}</span></span>
+            </div>
+            ${q.code ? `<div class="code-block">${q.code}</div>` : ''}
+            <div class="options">
+                ${q.opts.map((opt, j) => `
+                    <div class="option" id="opt${quizNum}_${i}_${j}" onclick="selectOption(${quizNum}, ${i}, ${j})">
+                        <span class="opt-letter">${String.fromCharCode(65+j)}</span>
+                        <span class="opt-text">${opt}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="btn-show-answer" id="btn${quizNum}_${i}" onclick="showAnswer(${quizNum}, ${i})">Show Answer</button>
+            <div class="answer-box" id="ans${quizNum}_${i}">
+                <div class="answer-label">Answer</div>
+                <div class="answer-text">${q.opts[q.ans]} <br><br>${q.exp}</div>
+            </div>
+            <div class="grade-section" id="grade${quizNum}_${i}">
+                <span class="grade-label">Your grade (0-${q.marks}):</span>
+                <input type="number" class="grade-input" id="gradeInput${quizNum}_${i}" min="0" max="${q.marks}" step="0.25" value="">
+                <span class="grade-max">/ ${q.marks}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function showTab(n) {
+    currentTab = n;
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i+1===n));
+    document.querySelectorAll('.tab-content').forEach((div, i) => div.classList.toggle('active', i+1===n));
+}
+
+function selectOption(quizNum, qIdx, optIdx) {
+    if(document.getElementById('ans' + quizNum + '_' + qIdx).classList.contains('show')) return;
+    const opts = document.querySelectorAll('#q' + quizNum + '_' + qIdx + ' .option');
+    opts.forEach((opt, i) => opt.classList.toggle('selected', i===optIdx));
+}
+
+function showAnswer(quizNum, qIdx) {
+    const question = quizNum===1 ? Q1 : quizNum===2 ? Q2 : Q3;
+    const q = question[qIdx];
+    document.getElementById('btn' + quizNum + '_' + qIdx).disabled = true;
+    document.getElementById('ans' + quizNum + '_' + qIdx).classList.add('show');
+    document.getElementById('grade' + quizNum + '_' + qIdx).classList.add('show');
+    
+    const opts = document.querySelectorAll('#q' + quizNum + '_' + qIdx + ' .option');
+    opts.forEach((opt, i) => {
+        opt.classList.remove('selected');
+        if(i===q.ans) opt.classList.add('correct');
+        else if(opt.classList.contains('selected')) opt.classList.add('wrong');
+    });
+    
+    updateProgress(quizNum);
+}
+
+function updateProgress(quizNum) {
+    const question = quizNum===1 ? Q1 : quizNum===2 ? Q2 : Q3;
+    let answered = 0;
+    for(let i=0;i<question.length;i++) {
+        if(document.getElementById('ans' + quizNum + '_' + i).classList.contains('show')) answered++;
+    }
+    document.getElementById('progress' + quizNum).textContent = answered + ' / ' + question.length + ' answered';
+    document.getElementById('fill' + quizNum).style.width = (answered * 10) + '%';
+}
+
+function submitQuiz(quizNum) {
+    const question = quizNum===1 ? Q1 : quizNum===2 ? Q2 : Q3;
+    let total = 0;
+    let maxTotal = 0;
+    
+    for(let i=0;i<question.length;i++) {
+        const gradeInput = document.getElementById('gradeInput' + quizNum + '_' + i);
+        let val = parseFloat(gradeInput.value);
+        if(isNaN(val)) val = 0;
+        val = Math.max(0, Math.min(val, question[i].marks));
+        total += val;
+        maxTotal += question[i].marks;
+    }
+    
+    const pct = Math.round((total / maxTotal) * 100);
+    document.getElementById('score' + quizNum).textContent = total.toFixed(2);
+    document.getElementById('pct' + quizNum).textContent = pct + '%';
+    
+    let gradeText, msg;
+    if(total <= 5) { gradeText = 'Redo Quiz'; msg = '0-5: You need more practice. Try again!'; }
+    else if(total <= 7) { gradeText = 'Good'; msg = '5-7: Good effort! Keep studying.'; }
+    else { gradeText = 'Excellent'; msg = '8-10: Great job! You mastered this topic.'; }
+    
+    document.getElementById('grade' + quizNum).textContent = gradeText;
+    document.getElementById('msg' + quizNum).textContent = msg;
+    document.getElementById('result' + quizNum).classList.add('show');
+    document.getElementById('result' + quizNum).scrollIntoView({behavior:'smooth'});
+}
+
+function retryQuiz(quizNum) {
+    document.getElementById('result' + quizNum).classList.remove('show');
+    userGrades[quizNum] = {};
+    renderQuiz(quizNum, quizNum===1 ? Q1 : quizNum===2 ? Q2 : Q3);
+    updateProgress(quizNum);
+}
+
+renderQuiz(1, Q1);
+renderQuiz(2, Q2);
+renderQuiz(3, Q3);
+</script>
+</body>
+</html>
